@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Registration Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            text-align: center;
+        }
+        form {
+            margin-top: 20px;
+        }
+        label, input {
+            display: block;
+            margin-bottom: 10px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 10px;
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="Login">
+            <div id="loginError" class="error"></div> <!-- Error message container -->
+            <div class="register-link" onclick="showRegisterForm()">Don't have an account? Register here.</div>
+        </form>
+        
+        <!-- Register Form -->
+        <form id="registerForm" style="display: none;">
+            <h2>Register</h2>
+            <label for="newUsername">Username:</label>
+            <input type="text" id="newUsername" name="newUsername" required>
+            <label for="newPassword">Password:</label>
+            <input type="password" id="newPassword" name="newPassword" required>
+            <input type="submit" value="Register">
+            <div id="registerError" class="error"></div> <!-- Error message container -->
+        </form>
+    </div>
+
+    <script>
+        // Function to display the register form and hide the login form
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Login successful, handle token storage and redirection
+                    localStorage.setItem('token', data.token);
+                    window.location.href = data.redirectTo; // Redirect to index.html
+                } else {
+                    // Login failed, display error message
+                    document.getElementById('loginError').textContent = data.message;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
+        // Registration form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const newUsername = document.getElementById('newUsername').value;
+            const newPassword = document.getElementById('newPassword').value;
+
+            try {
+                const response = await fetch('/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: newUsername, password: newPassword })
+                });
+
+                const data = await response.text();
+
+                if (response.ok) {
+                    // Registration successful, show success message
+                    alert(data);
+                } else {
+                    // Registration failed, display error message
+                    document.getElementById('registerError').textContent = data;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
